@@ -1,0 +1,1 @@
+编写Golang程序，将一个4GB的文件，切分成10个400MB的文件，并使用0g-storage-client上传并下载（参考fragment size参数设置）
