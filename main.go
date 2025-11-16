@@ -8,11 +8,28 @@ import (
 	"github.com/0glabs/0g-storage-client/core"
 	"github.com/0glabs/0g-storage-client/node"
 	"github.com/0glabs/0g-storage-client/transfer"
+	ecommon "github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	fileName     = "test.txt"
+	fragmentSize = 10
+	nodes        = []*node.ZgsClient{}
+	roots        = []ecommon.Hash{}
+)
+
+func init() {
+	urls := []string{
+		"http://127.0.0.1:5678",
+		"http://127.0.0.1:5679",
+		"http://127.0.0.1:5680",
+	}
+
+	nodes = node.MustNewZgsClients(urls)
+}
+
 func main() {
-	fileName := "test.txt"
 	if err := upload(fileName); err != nil {
 		log.Fatalf("upload failed: %v", err)
 	}
@@ -22,7 +39,7 @@ func main() {
 }
 
 func upload(fileName string) error {
-	uploader, err := transfer.NewUploader(context.Background(), nil, []*node.ZgsClient{}, common.LogOption{
+	uploader, err := transfer.NewUploader(context.Background(), nil, nodes, common.LogOption{
 		Logger: logrus.StandardLogger(),
 	})
 	if err != nil {
@@ -35,33 +52,30 @@ func upload(fileName string) error {
 	}
 	defer file.Close()
 
-	_, _, err = uploader.SplitableUpload(context.Background(), file, 10, transfer.UploadOption{})
+	_, roots, err = uploader.SplitableUpload(context.Background(), file, int64(fragmentSize), transfer.UploadOption{})
 	if err != nil {
 		return err
 	}
-
-	// if _, _, err := uploader.Upload(context.Background(), file); err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
 
 func download(fileName string) error {
-	downloader, err := transfer.NewDownloader([]*node.ZgsClient{}, common.LogOption{
+	downloader, err := transfer.NewDownloader(nodes, common.LogOption{
 		Logger: logrus.StandardLogger(),
 	})
 	if err != nil {
 		return err
 	}
 
-	if err := downloader.DownloadFragments(context.Background(), []string{"test.txt"}, fileName, false); err != nil {
-		return err
+	rootsStr := make([]string, len(roots))
+	for i, root := range roots {
+		rootsStr[i] = root.String()
 	}
 
-	// if err := downloader.Download(context.Background(), "test.txt", fileName, false); err != nil {
-	// 	return err
-	// }
+	if err := downloader.DownloadFragments(context.Background(), rootsStr, fileName, false); err != nil {
+		return err
+	}
 
 	return nil
 }
