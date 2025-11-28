@@ -4,6 +4,7 @@ go 1.25.4
 
 require (
 	github.com/0glabs/0g-storage-client v1.0.0
+	github.com/ethereum/go-ethereum v1.14.7
 	github.com/sirupsen/logrus v1.9.3
 )
 
@@ -36,7 +37,6 @@ require (
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect
-	github.com/ethereum/go-ethereum v1.14.7 // indirect
 	github.com/ethereum/go-verkle v0.1.1-0.20240306133620-7d920df305f0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fjl/memsize v0.0.2 // indirect
